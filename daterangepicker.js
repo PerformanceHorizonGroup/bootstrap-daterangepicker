@@ -80,6 +80,10 @@
             if (options.cancelClass) {
                 this.cancelClass = options.cancelClass;
             }
+
+            if (options.dayClass) {
+                this.dayClass = options.dayClass;
+            }
         }
 
         var DRPTemplate = '<div class="daterangepicker dropdown-menu">' +
@@ -612,8 +616,8 @@
         updateCalendars: function () {
             this.leftCalendar.calendar = this.buildCalendar(this.leftCalendar.month.month(), this.leftCalendar.month.year(), this.leftCalendar.month.hour(), this.leftCalendar.month.minute(), 'left');
             this.rightCalendar.calendar = this.buildCalendar(this.rightCalendar.month.month(), this.rightCalendar.month.year(), this.rightCalendar.month.hour(), this.rightCalendar.month.minute(), 'right');
-            this.container.find('.calendar.left').html(this.renderCalendar(this.leftCalendar.calendar, this.startDate, this.minDate, this.maxDate));
-            this.container.find('.calendar.right').html(this.renderCalendar(this.rightCalendar.calendar, this.endDate, this.startDate, this.maxDate));
+            this.container.find('.calendar.left').html(this.renderCalendar(this.leftCalendar.calendar, this.startDate, this.minDate, this.maxDate, 'rangeStart'));
+            this.container.find('.calendar.right').html(this.renderCalendar(this.rightCalendar.calendar, this.endDate, this.startDate, this.maxDate, 'rangeEnd'));
 
             this.container.find('.ranges li').removeClass('active');
             var customRange = true;
@@ -705,7 +709,7 @@
             return monthHtml + yearHtml;
         },
 
-        renderCalendar: function (calendar, selected, minDate, maxDate) {
+        renderCalendar: function (calendar, selected, minDate, maxDate, calType) {
 
             var html = '<div class="calendar-date">';
             html += '<table class="table-condensed">';
@@ -778,7 +782,20 @@
                     }
 
                     var title = 'r' + row + 'c' + col;
-                    html += '<td class="' + cname.replace(/\s+/g, ' ').replace(/^\s?(.*?)\s?$/, '$1') + '" data-title="' + title + '">' + calendar[row][col].date() + '</td>';
+					if(this.dayClass){
+                    	if(typeof this.dayClass=='string')
+                    		cname+=' '+this.dayClass;
+                    	else if(typeof this.dayClass=='function')
+	                  		cname=this.dayClass({
+                    			cname:cname,
+                    			row:row,
+                    			col:col,
+                    			calendar:calendar,
+                    			calendarType:calType
+                    		}) || cname;
+                    }
+                    cname=cname.replace(/\s+/g, ' ').replace(/^\s?(.*?)\s?$/, '$1'); // compact whitespace and trim
+                    html += '<td class="' + cname + '" data-title="' + title + '">' + calendar[row][col].date() + '</td>';
                 }
                 html += '</tr>';
             }
