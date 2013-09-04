@@ -502,6 +502,7 @@
             var row = title.substr(1, 1);
             var col = title.substr(3, 1);
             var cal = $(e.target).parents('.calendar');
+            var pickType;
 
             if (cal.hasClass('left')) {
                 var startDate = this.leftCalendar.calendar[row][col];
@@ -512,6 +513,7 @@
                         endDate = maxDate;
                     }
                 }
+                pickType='rangeStart';
             } else {
                 var startDate = this.startDate;
                 var endDate = this.rightCalendar.calendar[row][col];
@@ -521,7 +523,9 @@
                         startDate = minDate;
                     }
                 }
+                pickType='rangeEnd';
             }
+            this.element.trigger('pickRange', {startDate:startDate, endDate:endDate, pickType:pickType, picker: this});
 
             cal.find('td').removeClass('active');
 
