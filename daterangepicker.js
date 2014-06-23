@@ -381,6 +381,10 @@
                 this.container.find('.ranges').prepend(list);
             }
 
+            if (options.timePicker24hrEndTime) {
+                this.timePicker24hrEndTime = options.timePicker24hrEndTime;
+            }
+
             if (typeof callback === 'function') {
                 this.cb = callback;
             }
@@ -859,6 +863,8 @@
             } else {
                 startDate = this.startDate;
                 endDate = this.rightCalendar.calendar[row][col];
+                if(this.timePicker24hrEndTime && endDate.hour()==0 && endDate.minute()==0)
+                	endDate.add(1, 'day');
                 if (typeof this.dateLimit === 'object') {
                     var minDate = moment(endDate).subtract(this.dateLimit).startOf('day');
                     if (startDate.isBefore(minDate)) {
@@ -972,6 +978,8 @@
                 end.hour(hour);
                 end.minute(minute);
                 end.second(second);
+                if(this.timePicker24hrEndTime && this.endDate.hour()==0 && this.endDate.minute()==0 && this.endDate.second()==0)
+                	end.subtract(1, 'day');
                 this.endDate = end;
                 if (this.singleDatePicker)
                     this.startDate = end.clone();
@@ -1150,6 +1158,15 @@
             html += '</tr>';
             html += '</thead>';
             html += '<tbody>';
+            var selectedDay=selected.format('YYYY-MM-DD'),
+            	endDate=this.endDate;
+            if(this.timePicker){
+            	if(this.timePicker24hrEndTime && selected.hour()==0 && selected.minute()==0){
+            		endDate=moment(endDate).subtract(1, 'day');
+            		if(side=='right')
+            			selectedDay=moment(selected).subtract(1, 'day').format('YYYY-MM-DD');
+            	}
+            }
 
             for (var row = 0; row < 6; row++) {
                 html += '<tr>';
@@ -1168,18 +1185,18 @@
 
                     if ((minDate && calendar[row][col].isBefore(minDate, 'day')) || (maxDate && calendar[row][col].isAfter(maxDate, 'day'))) {
                         cname = ' off disabled ';
-                    } else if (calendar[row][col].format('YYYY-MM-DD') == selected.format('YYYY-MM-DD')) {
-                        cname += ' active ';
-                        if (calendar[row][col].format('YYYY-MM-DD') == this.startDate.format('YYYY-MM-DD')) {
-                            cname += ' start-date ';
-                        }
-                        if (calendar[row][col].format('YYYY-MM-DD') == this.endDate.format('YYYY-MM-DD')) {
-                            cname += ' end-date ';
-                        }
-                    } else if (calendar[row][col] >= this.startDate && calendar[row][col] <= this.endDate) {
+                    } else if (calendar[row][col].format('YYYY-MM-DD') == selectedDay) {
+                        cname += ' active '+(side=='left'?'start-date':'end-date')+' ';
+//                        if (calendar[row][col].format('YYYY-MM-DD') == this.startDate.format('YYYY-MM-DD')) {
+//                            cname += ' start-date ';
+//                        }
+//                        if (calendar[row][col].format('YYYY-MM-DD') == this.endDate.format('YYYY-MM-DD')) {
+//                            cname += ' end-date ';
+//                        }
+                   } else if (calendar[row][col] >= this.startDate && calendar[row][col] <= endDate) {
                         cname += ' in-range ';
                         if (calendar[row][col].isSame(this.startDate)) { cname += ' start-date '; }
-                        if (calendar[row][col].isSame(this.endDate)) { cname += ' end-date '; }
+                        if (calendar[row][col].isSame(endDate)) { cname += ' end-date '; }
                     }
 
                     var title = 'r' + row + 'c' + col;
@@ -1200,7 +1217,7 @@
 
                 // Disallow selections before the minDate or after the maxDate
                 var min_hour = 0;
-                var max_hour = 23;
+                var max_hour = this.timePicker24hrEndTime && side=='right' ? 24 : 23;
 
                 if (minDate && (side == 'left' || this.singleDatePicker) && selected.format('YYYY-MM-DD') == minDate.format('YYYY-MM-DD')) {
                     min_hour = minDate.hour();
@@ -1230,6 +1247,10 @@
                         selected_hour -= 12;
                     if (selected_hour === 0)
                         selected_hour = 12;
+                }else if(this.timePicker24hrEndTime && side=='right'){
+                	end=24;
+                    if (selected_hour == 0 && selected.minute()==0)
+                        selected_hour = 24;
                 }
 
                 for (i = start; i <= end; i++) {
@@ -1245,7 +1266,10 @@
 
                 html += '</select> : ';
 
-                html += '<select class="minuteselect">';
+                html += '<select class="minuteselect"' 
+                if(selected_hour==24)
+                	html+=' disabled';
+                html+='>';
 
                 // Disallow selections before the minDate or after the maxDate
                 var min_minute = 0;
