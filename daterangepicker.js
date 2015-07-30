@@ -514,8 +514,11 @@
 
         updateFormInputs: function () {
             this.container.find('input[name=daterangepicker_start]').val(this.startDate.format(this.format));
-            this.container.find('input[name=daterangepicker_end]').val(this.endDate.format(this.format));
-
+         	var d=this.endDate;
+             if(this.timePicker24hrEndTime && d.hour()==0 && d.minute()==0)
+            	d=d.clone().subtract(1, 'day');
+            this.container.find('input[name=daterangepicker_end]').val(d.format(this.format));
+ 
             if (this.startDate.isSame(this.endDate) || this.startDate.isBefore(this.endDate)) {
                 this.container.find('button.applyBtn').removeAttr('disabled');
             } else {
@@ -698,7 +701,10 @@
             } else {
                 var dates = this.ranges[label];
                 this.container.find('input[name=daterangepicker_start]').val(dates[0].format(this.format));
-                this.container.find('input[name=daterangepicker_end]').val(dates[1].format(this.format));
+            	var d=dates[1];
+                 if(this.timePicker24hrEndTime && d.hour()==0 && d.minute()==0)
+                	d=d.clone().subtract(1, 'day');
+                this.container.find('input[name=daterangepicker_end]').val(d.format(this.format));
             }
         },
 
