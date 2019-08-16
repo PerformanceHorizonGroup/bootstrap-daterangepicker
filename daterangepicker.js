@@ -512,10 +512,13 @@
 
         updateFormInputs: function () {
             this.container.find('input[name=daterangepicker_start]').val(this.startDate.format(this.format));
-         	var d=this.endDate;
-             if(this.timePicker24hrEndTime && d.hour()==0 && d.minute()==0)
-            	d=d.clone().subtract(1, 'day');
-            this.container.find('input[name=daterangepicker_end]').val(d.format(this.format));
+         	var d = this.endDate,
+         		format = this.format;
+            if(this.timePicker24hrEndTime && d.hour()==0 && d.minute()==0){
+                d = d.clone().subtract(1, 'day');
+                format = format.replace(/\bHH\b/, '24');	// if the hours are to be displayed then print as 24 instead of 00
+            }
+            this.container.find('input[name=daterangepicker_end]').val(d.format(format));
  
             if (this.startDate.isSame(this.endDate) || this.startDate.isBefore(this.endDate)) {
                 this.container.find('button.applyBtn').removeAttr('disabled');
@@ -699,10 +702,13 @@
             } else {
                 var dates = this.ranges[label];
                 this.container.find('input[name=daterangepicker_start]').val(dates[0].format(this.format));
-            	var d=dates[1];
-                 if(this.timePicker24hrEndTime && d.hour()==0 && d.minute()==0)
-                	d=d.clone().subtract(1, 'day');
-                this.container.find('input[name=daterangepicker_end]').val(d.format(this.format));
+             	var d = dates[1],
+		     		format = this.format;
+		        if(this.timePicker24hrEndTime && d.hour()==0 && d.minute()==0){
+		            d = d.clone().subtract(1, 'day');
+		            format = format.replace(/\bHH\b/, '24');	// if the hours are to be displayed then print as 24 instead of 00
+		        }
+		        this.container.find('input[name=daterangepicker_end]').val(d.format(format));
             }
         },
 
@@ -825,7 +831,11 @@
             if (cal.hasClass('left')) {
                 this.container.find('input[name=daterangepicker_start]').val(this.leftCalendar.calendar[row][col].format(this.format));
             } else {
-                this.container.find('input[name=daterangepicker_end]').val(this.rightCalendar.calendar[row][col].format(this.format));
+	            	var d = this.rightCalendar.calendar[row][col],
+	                format = this.format;
+	            	if(this.timePicker24hrEndTime && d.hour()==0 && d.minute()==0)
+	            	    format = format.replace(/\bHH\b/, '24');	// if the hours are to be displayed then print as 24 instead of 00
+	            	this.container.find('input[name=daterangepicker_end]').val(d.format(format));
             }
         },
 
